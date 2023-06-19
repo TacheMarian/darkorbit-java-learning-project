@@ -1,5 +1,6 @@
-package com.company;
+package com.company.dao;
 
+import com.company.configs.DatabaseConfig;
 import com.company.entities.UserShips;
 
 import java.sql.Connection;
@@ -28,7 +29,7 @@ public class UserShipsImpl implements UserShipsDAO {
         ResultSet rs = null;
 
         try {
-            connection = Database.getConnection();
+            connection = DatabaseConfig.getConnection();
             stmt = connection.prepareStatement("SELECT ships.ShipName from ships join user_ships on " +
                     "ships.id_ships = user_ships.id_ships join accounts on accounts.id_accounts = user_ships.id_accounts " +
                     "where accounts.id_accounts = ?;");
@@ -58,6 +59,41 @@ public class UserShipsImpl implements UserShipsDAO {
         return listOfUsersShips;
     }
 
+    @Override
+    public List<String> getAllByAccountId(int accountID) throws SQLException {
+        List<String> listOfUsersShips = new ArrayList<>();
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            connection = DatabaseConfig.getConnection();
+            stmt = connection.prepareStatement("SELECT ShipName FROM ships join user_ships ON " +
+                    "user_ships.id_ships = ships.id_ships WHERE user_ships.id_accounts = ?;");
+            stmt.setInt(1, accountID);
+
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                String shipName = rs.getString("ShipName");
+                listOfUsersShips.add(shipName);
+            }
+        } catch (SQLException e) {
+            System.err.println("An error occurred while retrieving the list of ships: " + e.getMessage());
+
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (stmt != null) {
+                    stmt.close();
+                }
+            } catch (SQLException e) {
+                System.err.println("An error occurred while closing the resources: " + e.getMessage());
+            }
+        }
+
+        return listOfUsersShips;
+    }
 
     @Override
     public void update(UserShips userShips) throws SQLException {
@@ -69,7 +105,7 @@ public class UserShipsImpl implements UserShipsDAO {
         PreparedStatement stmt = null;
         int result=0;
         try {
-            connection = Database.getConnection();
+            connection = DatabaseConfig.getConnection();
             stmt = connection.prepareStatement("INSERT INTO user_ships " +
                     "(id_accounts, id_ships) VALUES (?, ?)");
 

@@ -1,4 +1,4 @@
-package com.company;
+package com.company.dao;
 
 import com.company.entities.Account;
 import com.company.entities.UserInventory;

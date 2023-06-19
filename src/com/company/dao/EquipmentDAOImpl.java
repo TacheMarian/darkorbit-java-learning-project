@@ -1,7 +1,7 @@
-package com.company;
+package com.company.dao;
 
-import com.company.entities.Account;
-import com.company.entities.UserInventory;
+import com.company.configs.DatabaseConfig;
+import com.company.entities.Equipment;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -9,23 +9,23 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-public class UserInventoryImpl implements UserInventoryDAO {
+public class EquipmentDAOImpl implements EquipmentDAO{
 
     private Connection connection;
 
-    public UserInventoryImpl() {
+    public EquipmentDAOImpl() {
     }
 
     @Override
-    public UserInventory get(UserInventory userInventory) {
+    public Equipment get(Equipment equipment) {
         PreparedStatement stmt = null;
         ResultSet rs = null;
 
         try {
-            connection = Database.getConnection();
+            connection = DatabaseConfig.getConnection();
             stmt = connection.prepareStatement("SELECT * FROM " +
-                    "darkorbit_accounts.user_inventory WHERE id_user_inventory = ?");
-            stmt.setInt(1, userInventory.getIdUserInventory());
+                    "darkorbit_accounts.equipment WHERE id_user_equipment = ?");
+            stmt.setInt(1, equipment.getIdEquipment());
 
             rs = stmt.executeQuery();
             if (rs.next()) {
@@ -38,15 +38,15 @@ public class UserInventoryImpl implements UserInventoryDAO {
                 int sg3NA03 = rs.getInt("A03");
                 int sg3NB01 = rs.getInt("B01");
                 int sg3NB02 = rs.getInt("B02");
-                userInventory.setLf1(lf1);
-                userInventory.setMp1(mp1);
-                userInventory.setLf2(lf2);
-                userInventory.setLf3(lf3);
-                userInventory.setSg3NA01(sg3NA01);
-                userInventory.setSg3NA02(sg3NA02);
-                userInventory.setSg3NA03(sg3NA03);
-                userInventory.setSg3NB01(sg3NB01);
-                userInventory.setSg3NB02(sg3NB02);
+                equipment.setLf1(lf1);
+                equipment.setMp1(mp1);
+                equipment.setLf2(lf2);
+                equipment.setLf3(lf3);
+                equipment.setSg3NA01(sg3NA01);
+                equipment.setSg3NA02(sg3NA02);
+                equipment.setSg3NA03(sg3NA03);
+                equipment.setSg3NB01(sg3NB01);
+                equipment.setSg3NB02(sg3NB02);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -63,42 +63,9 @@ public class UserInventoryImpl implements UserInventoryDAO {
             }
         }
 
-        return userInventory;
+        return equipment;
     }
 
-    @Override
-    public int get(Account account, String name) {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        int returned = 0;
-
-        try {
-            connection = Database.getConnection();
-            stmt = connection.prepareStatement("SELECT " + name+ " FROM " +
-                    "darkorbit_accounts.user_inventory WHERE id_user_inventory = " + account.getId());
-
-
-            rs = stmt.executeQuery();
-            if (rs.next()) {
-                returned = rs.getInt(name);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return returned;
-    }
 
     @Override
     public List<String> getAll() throws SQLException {
@@ -106,11 +73,11 @@ public class UserInventoryImpl implements UserInventoryDAO {
     }
 
     @Override
-    public void insert(UserInventory userInventory){
+    public void insert(Equipment equipment){
         PreparedStatement stmt = null;
 
         try {
-            connection = Database.getConnection();
+            connection = DatabaseConfig.getConnection();
             stmt = connection.prepareStatement("INSERT INTO user_inventory " +
                     "(lf1, mp1, lf2, lf3, A01, A02, A03, B01, B02) VALUES (1, 1, 0, 0, 1, 1, 0, 0, 0)");
 
@@ -134,15 +101,15 @@ public class UserInventoryImpl implements UserInventoryDAO {
         int result = 0;
 
         try {
-            connection = Database.getConnection();
-            String sql = "UPDATE darkorbit_accounts.user_inventory SET " +
-                    laserName + " = " + laserName + " + 1 WHERE id_user_inventory = ?";
+            connection = DatabaseConfig.getConnection();
+            String sql = "UPDATE darkorbit_accounts.equipment SET " +
+                    laserName + " = " + laserName + " + 1 WHERE id_user_equipment = ?";
             stmt = connection.prepareStatement(sql);
             stmt.setInt(1, accountsId);
             result = stmt.executeUpdate();
 
         } catch (SQLException e) {
-            System.err.println("An error occurred while updating the laser from inventory: " + e.getMessage());
+            System.err.println("An error occurred while updating the laser from equipment: " + e.getMessage());
 
         } finally {
             try {
@@ -167,15 +134,15 @@ public class UserInventoryImpl implements UserInventoryDAO {
         int result = 0;
 
         try {
-            connection = Database.getConnection();
-            String sql = "UPDATE darkorbit_accounts.user_inventory SET " +
-                    laserName + " = " + laserName + " - 1 WHERE id_user_inventory = ?";
+            connection = DatabaseConfig.getConnection();
+            String sql = "UPDATE darkorbit_accounts.equipment SET " +
+                    laserName + " = " + laserName + " - 1 WHERE id_user_equipment = ?";
             stmt = connection.prepareStatement(sql);
             stmt.setInt(1, accountsId);
             result = stmt.executeUpdate();
 
         } catch (SQLException e) {
-            System.err.println("An error occurred while updating the laser from inventory: " + e.getMessage());
+            System.err.println("An error occurred while updating the laser from equipment: " + e.getMessage());
 
         } finally {
             try {
@@ -200,15 +167,15 @@ public class UserInventoryImpl implements UserInventoryDAO {
         int result = 0;
 
         try {
-            connection = Database.getConnection();
-            String sql = "UPDATE darkorbit_accounts.user_inventory SET " +
-                    generatorName + " = " + generatorName + " + 1 WHERE id_user_inventory = ?";
+            connection = DatabaseConfig.getConnection();
+            String sql = "UPDATE darkorbit_accounts.equipment SET " +
+                    generatorName + " = " + generatorName + " + 1 WHERE id_user_equipment = ?";
             stmt = connection.prepareStatement(sql);
             stmt.setInt(1, accountsId);
             result = stmt.executeUpdate();
 
         } catch (SQLException e) {
-            System.err.println("An error occurred while updating the generator from inventory: " + e.getMessage());
+            System.err.println("An error occurred while updating the generator from equipment: " + e.getMessage());
 
         } finally {
             try {
@@ -233,15 +200,15 @@ public class UserInventoryImpl implements UserInventoryDAO {
         int result = 0;
 
         try {
-            connection = Database.getConnection();
-            String sql = "UPDATE darkorbit_accounts.user_inventory SET " +
-                    generatorName + " = " + generatorName + " - 1 WHERE id_user_inventory = ?";
+            connection = DatabaseConfig.getConnection();
+            String sql = "UPDATE darkorbit_accounts.equipment SET " +
+                    generatorName + " = " + generatorName + " - 1 WHERE id_user_equipment = ?";
             stmt = connection.prepareStatement(sql);
             stmt.setInt(1, accountsId);
             result = stmt.executeUpdate();
 
         } catch (SQLException e) {
-            System.err.println("An error occurred while updating the generator from inventory: " + e.getMessage());
+            System.err.println("An error occurred while updating the generator from equipment: " + e.getMessage());
 
         } finally {
             try {
@@ -261,7 +228,7 @@ public class UserInventoryImpl implements UserInventoryDAO {
     }
 
     @Override
-    public void delete(UserInventory userInventory) throws SQLException {
+    public void delete(Equipment equipment) throws SQLException {
 
     }
 }

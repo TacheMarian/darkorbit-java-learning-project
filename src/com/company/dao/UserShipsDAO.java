@@ -1,4 +1,4 @@
-package com.company;
+package com.company.dao;
 
 import com.company.entities.UserShips;
 
@@ -9,6 +9,8 @@ public interface UserShipsDAO {
     UserShips get(UserShips userShips) throws SQLException;
 
     List<String> getAll(UserShips userShips) throws SQLException;
+
+    List<String> getAllByAccountId(int accountId) throws SQLException;
 
     void update(UserShips userShips) throws SQLException ;
 

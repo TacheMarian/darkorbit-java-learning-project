@@ -1,5 +1,6 @@
-package com.company;
+package com.company.dao;
 
+import com.company.configs.DatabaseConfig;
 import com.company.entities.Account;
 
 import java.sql.Connection;
@@ -21,7 +22,7 @@ public class AccountsDAOImpl implements AccountsDAO {
         ResultSet rs = null;
 
         try {
-            connection = Database.getConnection();
+            connection = DatabaseConfig.getConnection();
             stmt = connection.prepareStatement("SELECT * FROM accounts WHERE account_name = ? " +
                     "AND account_password = ?");
             stmt.setString(1, account.getAccountName());
@@ -73,7 +74,7 @@ public class AccountsDAOImpl implements AccountsDAO {
         ResultSet rs = null;
 
         try {
-            connection = Database.getConnection();
+            connection = DatabaseConfig.getConnection();
             stmt = connection.prepareStatement("SELECT accounts.account_name from accounts;");
 
             rs = stmt.executeQuery();
@@ -106,7 +107,7 @@ public class AccountsDAOImpl implements AccountsDAO {
         PreparedStatement stmt = null;
 
         try {
-            connection = Database.getConnection();
+            connection = DatabaseConfig.getConnection();
             stmt = connection.prepareStatement("INSERT INTO accounts " +
                     "(account_name, account_password, experience, uridium, credits) VALUES (?, ?, ?, ?, ?)");
 
@@ -135,7 +136,7 @@ public class AccountsDAOImpl implements AccountsDAO {
         int result = 0;
 
         try {
-            connection = Database.getConnection();
+            connection = DatabaseConfig.getConnection();
             stmt = connection.prepareStatement("UPDATE darkorbit_accounts.accounts SET " +
                     " credits = credits - ? WHERE id_accounts = ?");
             stmt.setInt(1, priceInCredits);
@@ -168,7 +169,7 @@ public class AccountsDAOImpl implements AccountsDAO {
         int result = 0;
 
         try {
-            connection = Database.getConnection();
+            connection = DatabaseConfig.getConnection();
             stmt = connection.prepareStatement("UPDATE darkorbit_accounts.accounts SET " +
                     " uridium = uridium - ? WHERE id_accounts = ?");
             stmt.setInt(1, priceInUridium);

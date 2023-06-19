@@ -1,6 +1,7 @@
-package com.company;
+package com.company.dao;
 
-import com.company.entities.Laser;
+import com.company.configs.DatabaseConfig;
+import com.company.entities.Generator;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -9,41 +10,40 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LasersDAOImpl implements LasersDAO {
+public class GeneratorsDAOImpl implements GeneratorsDAO {
 
-    public LasersDAOImpl() {
+    public GeneratorsDAOImpl() {
     }
 
     private Connection connection;
 
-
     @Override
-    public Laser get(Laser laser){
+    public Generator get(Generator generator) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
 
         try {
-            connection = Database.getConnection();
-            stmt = connection.prepareStatement("SELECT * FROM lasers WHERE lasers.id_lasers = ?;");
-            stmt.setInt(1, laser.getIdLasers());
+            connection = DatabaseConfig.getConnection();
+            stmt = connection.prepareStatement("SELECT * FROM generators WHERE generators.id_generators = ?;");
+            stmt.setInt(1, generator.getIdGenerators());
 
 
             rs = stmt.executeQuery();
             if (rs.next()) {
 
-                int idLasers = rs.getInt("id_lasers");
+                int idGen = rs.getInt("id_generators");
                 String name = rs.getString("name");
-                int damage = rs.getInt("damage");
+                int shield = rs.getInt("shield");
                 int priceCredits = rs.getInt("priceCredits");
                 int priceUridium = rs.getInt("priceUridium");
 
-                laser.setIdLasers(idLasers);
-                laser.setName(name);
-                laser.setDamage(damage);
-                laser.setPriceCredits(priceCredits);
-                laser.setPriceUridium(priceUridium);
+                generator.setIdGenerators(idGen);
+                generator.setName(name);
+                generator.setShield(shield);
+                generator.setPriceCredits(priceCredits);
+                generator.setPriceUridium(priceUridium);
             } else {
-                System.out.println("Laser info problem");
+                System.out.println("Generator info problem");
             }
         } catch (SQLException e) {
             System.err.println("An error occurred while retrieving the laser info: " + e.getMessage());
@@ -62,32 +62,32 @@ public class LasersDAOImpl implements LasersDAO {
             }
         }
 
-        return laser;
+        return generator;
     }
 
     @Override
-    public List<String> getAllInfoAboutAllLasers(Laser laser){
-        List<String> listOfAllLasers = new ArrayList<>();
+    public List<String> InfoAboutAllGenerators(Generator generator) throws SQLException {
+        List<String> listOfAllGenerators = new ArrayList<>();
         PreparedStatement stmt = null;
         ResultSet rs = null;
 
         try {
-            connection = Database.getConnection();
-            stmt = connection.prepareStatement("SELECT * FROM darkorbit_accounts.lasers;");
+            connection = DatabaseConfig.getConnection();
+            stmt = connection.prepareStatement("SELECT * FROM darkorbit_accounts.generators;");
 
             rs = stmt.executeQuery();
             while (rs.next()) {
-                String laserName = rs.getString("name");
-                int damage = rs.getInt("damage");
+                String genName = rs.getString("name");
+                int shield = rs.getInt("shield");
                 int priceCredits = rs.getInt("priceCredits");
                 int priceUridium = rs.getInt("priceUridium");
                 String resultSet = "";
                 if(priceUridium==0){
-                    resultSet = "Laser name: "+ laserName + "; Maximum damage output: " + damage + "; Price: " + priceCredits + " credits";
+                    resultSet = "Generator name: "+ genName + "; Shield: " + shield + "; Price: " + priceCredits + " credits";
                 }else if(priceCredits == 0){
-                    resultSet = "Laser name: "+ laserName + "; Maximum damage output: " + damage + "; Price: " + priceUridium + " uridium";
+                    resultSet = "Generator name: "+ genName + "; Shield: " + shield + "; Price: " + priceUridium + " uridium";
                 }
-                listOfAllLasers.add(resultSet);
+                listOfAllGenerators.add(resultSet);
             }
         } catch (SQLException e) {
             System.err.println("An error occurred while retrieving the list of laser: " + e.getMessage());
@@ -106,26 +106,26 @@ public class LasersDAOImpl implements LasersDAO {
             }
         }
 
-        return listOfAllLasers;
+        return listOfAllGenerators;
     }
 
     @Override
-    public List<String> getAllLasers(Laser laser){
-        List<String> listOfAllLasers = new ArrayList<>();
+    public List<String> getAllGenerators(Generator generator) throws SQLException {
+        List<String> listOfAllGen = new ArrayList<>();
         PreparedStatement stmt = null;
         ResultSet rs = null;
 
         try {
-            connection = Database.getConnection();
-            stmt = connection.prepareStatement("SELECT * FROM darkorbit_accounts.lasers;");
+            connection = DatabaseConfig.getConnection();
+            stmt = connection.prepareStatement("SELECT * FROM darkorbit_accounts.generators;");
 
             rs = stmt.executeQuery();
             while (rs.next()) {
-                String laserName = rs.getString("name");
-                listOfAllLasers.add(laserName);
+                String generatorName = rs.getString("name");
+                listOfAllGen.add(generatorName);
             }
         } catch (SQLException e) {
-            System.err.println("An error occurred while retrieving the list of laser: " + e.getMessage());
+            System.err.println("An error occurred while retrieving the list of generator: " + e.getMessage());
 
         } finally {
             try {
@@ -141,26 +141,26 @@ public class LasersDAOImpl implements LasersDAO {
             }
         }
 
-        return listOfAllLasers;
+        return listOfAllGen;
     }
 
     @Override
-    public int updateBuyLaserCredits(Laser laser, int priceInCredits) throws SQLException {
+    public int updateBuyGeneratorsCredits(Generator generator, int priceInCredits) throws SQLException {
         return 0;
     }
 
     @Override
-    public int updateBuyLaserUridium(Laser laser, int priceInUridium) throws SQLException {
+    public int updateBuyGeneratorsUridium(Generator generator, int priceInUridium) throws SQLException {
         return 0;
     }
 
     @Override
-    public void insert(Laser laser) throws SQLException {
+    public void insert(Generator generator) throws SQLException {
 
     }
 
     @Override
-    public void delete(Laser laser) throws SQLException {
+    public void delete(Generator generator) throws SQLException {
 
     }
 }

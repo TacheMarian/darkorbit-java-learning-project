@@ -1,15 +1,15 @@
-package com.company;
+package com.company.configs;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class Database {
+public class DatabaseConfig {
     private static String url = "jdbc:mysql://localhost/darkorbit_accounts";
     private static String user = "darkorbitonly";
     private static String password = "darkbot";
 
-    public Database() {
+    public DatabaseConfig() {
     }
 
     public static String getUrl() {
@@ -17,7 +17,7 @@ public class Database {
     }
 
     public static void setUrl(String url) {
-        Database.url = url;
+        DatabaseConfig.url = url;
     }
 
     public static String getUser() {
@@ -25,7 +25,7 @@ public class Database {
     }
 
     public static void setUser(String user) {
-        Database.user = user;
+        DatabaseConfig.user = user;
     }
 
     public static String getPassword() {
@@ -33,7 +33,7 @@ public class Database {
     }
 
     public static void setPassword(String password) {
-        Database.password = password;
+        DatabaseConfig.password = password;
     }
 
     public static Connection getConnection() throws SQLException{

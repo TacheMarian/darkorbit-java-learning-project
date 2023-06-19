@@ -1,5 +1,6 @@
-package com.company;
+package com.company.dao;
 
+import com.company.configs.DatabaseConfig;
 import com.company.entities.Ship;
 
 import java.sql.Connection;
@@ -21,7 +22,7 @@ public class ShipsDAOImpl implements ShipsDAO {
         ResultSet rs = null;
 
         try {
-            connection = Database.getConnection();
+            connection = DatabaseConfig.getConnection();
             stmt = connection.prepareStatement("SELECT * FROM ships WHERE ships.id_ships = ?;");
             stmt.setInt(1, ship.getShipId());
 
@@ -71,7 +72,7 @@ public class ShipsDAOImpl implements ShipsDAO {
         ResultSet rs = null;
 
         try {
-            connection = Database.getConnection();
+            connection = DatabaseConfig.getConnection();
             stmt = connection.prepareStatement("SELECT ships.ShipName from ships;");
 
             rs = stmt.executeQuery();
