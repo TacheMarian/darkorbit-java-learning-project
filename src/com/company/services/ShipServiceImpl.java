@@ -45,11 +45,13 @@ public class ShipServiceImpl implements ShipService {
                 listOfNotOwenedShips.add(str1);
                 shipOptionNumber++;
             }
+            System.out.println("0. Back");
             int userSelectedOption = s.nextInt();
             s.nextLine();
             if(userSelectedOption > 0 && userSelectedOption < (listOfNotOwenedShips.size()+1)){
                 ship.setShipName(listOfNotOwenedShips.get(userSelectedOption-1));
-            }else{
+            }else if(userSelectedOption == 0){return;}
+            else{
                 System.out.println("No viable value, try again");
                 buyShip(account);
                 return;

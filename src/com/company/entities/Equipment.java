@@ -15,7 +15,9 @@ public class Equipment {
     public Equipment() {
     }
 
-
+    public Equipment(int idEquipment) {
+        this.idEquipment = idEquipment;
+    }
 
     @Override
     public String toString() {

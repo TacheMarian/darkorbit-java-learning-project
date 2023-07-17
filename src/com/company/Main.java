@@ -18,7 +18,7 @@ public class Main {
     static UserInventory userInventory;
     static UserShips userShips;
     static List<String> listOfShips;
-    static Ship chosenShip;
+    static Ship currentShip;
     static Laser laser;
     static List<String> listOfAllInfoAboutLasers;
     static List<String> listOfAllLasers;
@@ -26,11 +26,12 @@ public class Main {
     static List<String> listOfAllInfoAboutGenerators;
     static List<String> listOfAllGenerators;
     static Equipment equipment;
-    static int maxDamage;
-    static int shield;
+    static StarshipStats starshipStats;
 
 
-    public static void loginOrRegister(AccountsDAO accountsDAO, UserInventoryDAO userInventoryDAO, UserShipsDAO userShipsDAO) {
+
+    public static void loginOrRegister(AccountsDAO accountsDAO, UserInventoryDAO userInventoryDAO,
+                                       UserShipsDAO userShipsDAO, StarshipStatsDAO starshipStatsDAO, EquipmentDAO equipmentDAO) {
         System.out.println("Press L for login or R for register");
         String m = s.nextLine().toLowerCase();
         if (m.equals("l")) {
@@ -40,14 +41,22 @@ public class Main {
             String password = s.nextLine();
             account = new Account(username, password);
             userInventory = new UserInventory();
+            currentShip = new Ship();
+            starshipStats = new StarshipStats();
+            equipment = new Equipment();
 
             try{
                 accountsDAO.get(account);
                 if(account.getId()==0){
-                    loginOrRegister(accountsDAO, userInventoryDAO, userShipsDAO);
+                    loginOrRegister(accountsDAO, userInventoryDAO, userShipsDAO, starshipStatsDAO, equipmentDAO);
                 }else{
                     userInventory.setIdUserInventory(account.getId());
                     userInventoryDAO.get(userInventory);
+                    starshipStats.setIdStarshipStats(account.getId());
+                    starshipStatsDAO.get(starshipStats);
+                    currentShip.setShipName(starshipStats.getStarshipName());
+                    equipment.setIdEquipment(account.getId());
+                    equipmentDAO.get(equipment);
                     System.out.println("Login successful!");
                 }
             }catch (SQLException e){
@@ -80,73 +89,77 @@ public class Main {
             }catch (SQLException e){
                 e.printStackTrace();
             }
-            loginOrRegister(accountsDAO, userInventoryDAO, userShipsDAO);
+            loginOrRegister(accountsDAO, userInventoryDAO, userShipsDAO, starshipStatsDAO, equipmentDAO);
 
         }else {
             System.out.println("Didn't get the right message. Try again");
-            loginOrRegister(accountsDAO, userInventoryDAO, userShipsDAO);
+            loginOrRegister(accountsDAO, userInventoryDAO, userShipsDAO, starshipStatsDAO, equipmentDAO);
         }
     }
 
-    public static void chooseShip(UserShipsDAO userShipsDAO, int accountsId, ShipsDAO shipsDAO){
+    public static void chooseShip(UserShipsDAO userShipsDAO, int accountsId, ShipsDAO shipsDAO, StarshipStatsDAO starshipStatsDAO){
         System.out.println("Choose your ship from the available displayed ships");
         UserShips userShips = new UserShips(accountsId);
-        int n = 1;
+        int itterationVarForShipList = 1;
         try {
             listOfShips = userShipsDAO.getAll(userShips);
             for (String str : userShipsDAO.getAll(userShips)) {
-                System.out.println(n +" "+str);
-                n++;
+                System.out.println(itterationVarForShipList +" "+str);
+                itterationVarForShipList++;
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        int m = s.nextInt();
-        if(m>0 && m < (listOfShips.size()+1)){
-            chosenShip = new Ship(listOfShips.get(m-1));
+        int userResponseFromShipList = s.nextInt();
+        if(userResponseFromShipList>0 && userResponseFromShipList < (listOfShips.size()+1)){
+            currentShip = new Ship(listOfShips.get(userResponseFromShipList-1));
         }else{
             System.out.println("Wrong value, try again.");
-            chooseShip(userShipsDAO, accountsId, shipsDAO);
+            chooseShip(userShipsDAO, accountsId, shipsDAO, starshipStatsDAO);
         }
 
 
-        switch (chosenShip.getShipName()){
+        switch (currentShip.getShipName()){
             case "Pheonix":
-                chosenShip.setShipId(1);
+                currentShip.setShipId(1);
                 break;
             case "Yamato":
-                chosenShip.setShipId(2);
+                currentShip.setShipId(2);
                 break;
             case "Liberator":
-                chosenShip.setShipId(3);
+                currentShip.setShipId(3);
                 break;
             case "Leonov":
-                chosenShip.setShipId(4);
+                currentShip.setShipId(4);
                 break;
             case "Piranha":
-                chosenShip.setShipId(5);
+                currentShip.setShipId(5);
                 break;
             case "Nostromo":
-                chosenShip.setShipId(6);
+                currentShip.setShipId(6);
                 break;
             case "Big Boy":
-                chosenShip.setShipId(7);
+                currentShip.setShipId(7);
                 break;
             case "Vengeance":
-                chosenShip.setShipId(8);
+                currentShip.setShipId(8);
                 break;
             case "Goliath":
-                chosenShip.setShipId(9);
+                currentShip.setShipId(9);
                 break;
         }
 
         try {
-            shipsDAO.get(chosenShip);
-            System.out.println("Ship name: " + chosenShip.getShipName()
-                                + "\nShip hp: " + chosenShip.getShipHp()
-                                + "\nShip Laser Slots: " + chosenShip.getShipsLaserSlots()
-                                + "\nShip Generator Slots: " + chosenShip.getShipsGenSlots());
+            shipsDAO.get(currentShip);
+            System.out.println("Ship name: " + currentShip.getShipName()
+                                + "\nShip hp: " + currentShip.getShipHp()
+                                + "\nShip Laser Slots: " + currentShip.getShipsLaserSlots()
+                                + "\nShip Generator Slots: " + currentShip.getShipsGenSlots());
+            starshipStats.setStarshipName(currentShip.getShipName());
+            starshipStatsDAO.updateChosenShipName(starshipStats);
+
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -155,13 +168,56 @@ public class Main {
 
     public static void mainMenu(UserShipsDAO userShipsDAO, ShipsDAO shipsDAO, AccountsDAO accountsDAO,
                                 LasersDAO lasersDAO, UserInventoryDAO userInventoryDAO,
-                                GeneratorsDAO generatorsDAO, EquipmentDAO equipmentDAO){
+                                GeneratorsDAO generatorsDAO, EquipmentDAO equipmentDAO, StarshipStatsDAO starshipStatsDAO){
         boolean running = true;
+
+        switch (currentShip.getShipName()){
+            case "Pheonix":
+                currentShip.setShipId(1);
+                break;
+            case "Yamato":
+                currentShip.setShipId(2);
+                break;
+            case "Liberator":
+                currentShip.setShipId(3);
+                break;
+            case "Leonov":
+                currentShip.setShipId(4);
+                break;
+            case "Piranha":
+                currentShip.setShipId(5);
+                break;
+            case "Nostromo":
+                currentShip.setShipId(6);
+                break;
+            case "Big Boy":
+                currentShip.setShipId(7);
+                break;
+            case "Vengeance":
+                currentShip.setShipId(8);
+                break;
+            case "Goliath":
+                currentShip.setShipId(9);
+                break;
+        }
+        try {
+            shipsDAO.get(currentShip);
+            System.out.println("Ship name: " + currentShip.getShipName()
+                    + "\nShip hp: " + currentShip.getShipHp()
+                    + "\nShip Laser Slots: " + currentShip.getShipsLaserSlots()
+                    + "\nShip Generator Slots: " + currentShip.getShipsGenSlots());
+            starshipStats.setStarshipName(currentShip.getShipName());
+            starshipStatsDAO.updateChosenShipName(starshipStats);
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         while (running) {
             System.out.println("=== Main Menu ===");
             System.out.println("1. Shop");
             System.out.println("2. Equipment");
-            System.out.println("3. Back to choosing your ship");
+            System.out.println("3. Choose another ship");
             System.out.println("4. Start");
             System.out.println("0. Log out");
 
@@ -169,30 +225,40 @@ public class Main {
 
             switch (choice) {
                 case 1:
-                    shopMenu(shipsDAO, accountsDAO, userShipsDAO, lasersDAO, userInventoryDAO, generatorsDAO, equipmentDAO);
+                    shopMenu(shipsDAO, accountsDAO, userShipsDAO, lasersDAO, userInventoryDAO, generatorsDAO, equipmentDAO, starshipStatsDAO);
                     break;
                 case 2:
-                    equipmentMenu(userInventoryDAO, lasersDAO,generatorsDAO, equipmentDAO);
+                    equipmentMenu(userInventoryDAO, lasersDAO,generatorsDAO, equipmentDAO, starshipStatsDAO);
                     break;
                 case 3:
-                    chooseShip(userShipsDAO, account.getId(), shipsDAO);
+                    chooseShip(userShipsDAO, account.getId(), shipsDAO, starshipStatsDAO);
                     break;
-                case 4:
-                    start(shipsDAO, maxDamage, shield);
-                    break;
+
                 case 0:
                     running = false;
-                    System.out.println("Log out...");
+
                     break;
                 default:
                     System.out.println("Invalid choice. Try again.");
             }
+            try{
+                starshipStats.setDamage(equipment.getLf1()*40 + equipment.getMp1()*60
+                        + equipment.getLf2() * 120 + equipment.getLf3() * 150);
+                starshipStatsDAO.updateDamage(starshipStats);
+                starshipStats.setShield(equipment.getSg3NA01() * 1000 + equipment.getSg3NA02() * 2000
+                        + equipment.getSg3NA03() * 5000 + equipment.getSg3NB01() * 7000 + equipment.getSg3NB02() * 10000);
+                starshipStatsDAO.updateShield(starshipStats);
+                starshipStats.setHp(currentShip.getShipHp());
+            }catch (SQLException e){
+                System.out.println(e.getMessage());
+            }
+
         }
     }
 
     public static void shopMenu(ShipsDAO shipsDAO, AccountsDAO accountsDAO, UserShipsDAO userShipsDAO,
                                 LasersDAO lasersDAO, UserInventoryDAO userInventoryDAO,
-                                GeneratorsDAO generatorsDAO, EquipmentDAO equipmentDAO) {
+                                GeneratorsDAO generatorsDAO, EquipmentDAO equipmentDAO, StarshipStatsDAO starshipStatsDAO) {
         System.out.println("Credits: " + account.getCredits() + "\nUridium: " + account.getUridium()+"\n");
 
         System.out.println("=== Shop Menu ===");
@@ -215,11 +281,11 @@ public class Main {
                 buyGenerator(generatorsDAO, accountsDAO, userInventoryDAO, shipsDAO, userShipsDAO);
                 break;
             case 0:
-                mainMenu(userShipsDAO, shipsDAO, accountsDAO, lasersDAO, userInventoryDAO, generatorsDAO, equipmentDAO);
+                mainMenu(userShipsDAO, shipsDAO, accountsDAO, lasersDAO, userInventoryDAO, generatorsDAO, equipmentDAO, starshipStatsDAO);
                 break;
             default:
                 System.out.println("Invalid choice. Try again.");
-                shopMenu(shipsDAO, accountsDAO, userShipsDAO, lasersDAO, userInventoryDAO, generatorsDAO, equipmentDAO);
+                shopMenu(shipsDAO, accountsDAO, userShipsDAO, lasersDAO, userInventoryDAO, generatorsDAO, equipmentDAO, starshipStatsDAO);
         }
     }
 
@@ -347,13 +413,11 @@ public class Main {
     }
 
     public static void equipmentMenu(UserInventoryDAO userInventoryDAO, LasersDAO lasersDAO,GeneratorsDAO generatorsDAO,
-                                 EquipmentDAO equipmentDAO) {
+                                 EquipmentDAO equipmentDAO, StarshipStatsDAO starshipStatsDAO) {
         System.out.println("=== Equipment Menu ===");
-        System.out.println("1. Equip laser");
-        System.out.println("2. Equip generator");
+        System.out.println("1. Lasers");
+        System.out.println("2. Generators");
         System.out.println("0. Back");
-        equipment = new Equipment();
-        equipment.setIdEquipment(account.getId());
         listOfAllLasers = new ArrayList<>();
         listOfAllGenerators = new ArrayList<>();
         try{
@@ -372,28 +436,27 @@ public class Main {
 
         switch (choice) {
             case 1:
-                equipLasers(userInventoryDAO, lasersDAO, equipmentDAO, generatorsDAO);
+                equipLasers(userInventoryDAO, lasersDAO, equipmentDAO, generatorsDAO, starshipStatsDAO);
                 break;
             case 2:
-                equipGenerators(userInventoryDAO, generatorsDAO, equipmentDAO, lasersDAO);
+                equipGenerators(userInventoryDAO, generatorsDAO, equipmentDAO, lasersDAO, starshipStatsDAO);
                 break;
             case 0:
                 break;
             default:
                 System.out.println("Invalid choice. Try again.");
-                equipmentMenu(userInventoryDAO, lasersDAO,generatorsDAO, equipmentDAO);
+                equipmentMenu(userInventoryDAO, lasersDAO,generatorsDAO, equipmentDAO, starshipStatsDAO);
         }
     }
 
     public static void equipLasers(UserInventoryDAO userInventoryDAO, LasersDAO lasersDAO, EquipmentDAO equipmentDAO,
-                                 GeneratorsDAO generatorsDAO ) {
+                                 GeneratorsDAO generatorsDAO, StarshipStatsDAO starshipStatsDAO ) {
         try{
             userInventoryDAO.get(userInventory);
         }catch (SQLException e){
-            System.out.println("Exception in updating userInventory befor displaying numbers of laser per type" + e.getMessage());
+            System.out.println("Exception in updating userInventory before displaying numbers of laser per type" + e.getMessage());
         }
-        int damage = 0;
-        int freeLaserSlots = chosenShip.getShipsLaserSlots()-equipment.getLf1()
+        int freeLaserSlots = currentShip.getShipsLaserSlots()-equipment.getLf1()
                 -equipment.getMp1()-equipment.getLf2()-equipment.getLf3();
 
 
@@ -402,7 +465,9 @@ public class Main {
                 + userInventory.getMp1() + " MP1, "
                 + userInventory.getLf2() + " LF2, "
                 + userInventory.getLf3()+ " LF3.");
-        System.out.println("\n1. Equip you ship with laserss \n2. Unequip laser from your ship \n0. Exit to equipment menu");
+        System.out.println("\n1. Equip you ship with lasers " +
+                "\n2. Unequip laser from your ship " +
+                "\n0. Exit to equipment menu");
         System.out.println("Your answer : ");
         int answer1 = s.nextInt();
 
@@ -414,11 +479,11 @@ public class Main {
                 System.out.println(n + ". " + str);
                 n++;
             }
-            int idOfSelectedLaser = s.nextInt();
+            int idOfSelectedLaser = s.nextInt();//adaugat un if pt verificarea daca exista id in db
             laser.setIdLasers(idOfSelectedLaser);
             while(true){
                 if(idOfSelectedLaser > 0 && idOfSelectedLaser<(listOfAllLasers.size()+1)){
-                    System.out.println("You have " + freeLaserSlots + " / " + chosenShip.getShipsLaserSlots() +
+                    System.out.println("You have " + freeLaserSlots + " / " + currentShip.getShipsLaserSlots() +
                             " slots available.");
                     System.out.println("Press 1 to equip one laser of this type or 0 to exit");
                     int answer2 = s.nextInt();
@@ -428,13 +493,13 @@ public class Main {
                             int numberOfLasersOfThisType = userInventoryDAO.get(account, laser.getName());
                             if(numberOfLasersOfThisType>0){
                                 freeLaserSlots--;
-                                damage = damage + laser.getDamage();
                                 userInventoryDAO.updateLaserEquip(account.getId(), laser.getName());
                                 equipmentDAO.updateLaser(account.getId(), laser.getName());
                             }else{
                                 System.out.println("You have 0 laser of type: " + laser.getName());
                                 break;
                             }
+
                         }catch (SQLException e){
                             System.out.println("Equipping laser exception "+ e.getMessage());
                         }
@@ -444,24 +509,27 @@ public class Main {
                     }else  if (answer2 == 0){
                         break;
                     }
+
+
                 }
             }
 
+        }else if(answer1 == 2){
+            unequipLaser(userInventoryDAO, lasersDAO, equipmentDAO, generatorsDAO, starshipStatsDAO);
         }
-        equipmentMenu(userInventoryDAO, lasersDAO,generatorsDAO, equipmentDAO);
-        maxDamage = damage;
+        equipmentMenu(userInventoryDAO, lasersDAO,generatorsDAO, equipmentDAO, starshipStatsDAO);
+
 
     }
 
     public static void equipGenerators(UserInventoryDAO userInventoryDAO, GeneratorsDAO generatorsDAO,
-                                      EquipmentDAO equipmentDAO, LasersDAO lasersDAO ) {
+                                      EquipmentDAO equipmentDAO, LasersDAO lasersDAO, StarshipStatsDAO starshipStatsDAO ) {
         try{
             userInventoryDAO.get(userInventory);
         }catch (SQLException e){
-            System.out.println("Exception in updating userInventory befor displaying numbers of generator per type" + e.getMessage());
+            System.out.println("Exception in updating userInventory before displaying numbers of generator per type" + e.getMessage());
         }
-        int shield1 = 0;
-        int freeGeneratorsSlots = chosenShip.getShipsGenSlots()-equipment.getSg3NA01()
+        int freeGeneratorsSlots = currentShip.getShipsGenSlots()-equipment.getSg3NA01()
                 -equipment.getSg3NA02()-equipment.getSg3NA03()-equipment.getSg3NB01()-equipment.getSg3NB02();
 
 
@@ -485,10 +553,10 @@ public class Main {
             int idOfSelectedGen = s.nextInt();
             generator.setIdGenerators(idOfSelectedGen);
             while(true){
-                if(idOfSelectedGen > 0 && idOfSelectedGen<(listOfAllLasers.size()+1)){
-                    System.out.println("You have " + freeGeneratorsSlots + " / " + chosenShip.getShipsGenSlots() +
+                if(idOfSelectedGen > 0 && idOfSelectedGen<(listOfAllGenerators.size()+1)){
+                    System.out.println("You have " + freeGeneratorsSlots + " / " + currentShip.getShipsGenSlots() +
                             " slots available.");
-                    System.out.println("Press 1 to equip one laser of this type or 0 to exit");
+                    System.out.println("Press 1 to equip one generator of this type or 0 to exit");
                     int answer2 = s.nextInt();
                     if(answer2 == 1 && freeGeneratorsSlots >0 ){
                         try{
@@ -496,8 +564,7 @@ public class Main {
                             int numberOfGenOfThisType = userInventoryDAO.get(account, generator.getName());
                             if(numberOfGenOfThisType>0){
                                 freeGeneratorsSlots--;
-                                shield1 += generator.getShield();
-                                userInventoryDAO.updateGeneratorEquip(account.getId(), generator.getName());
+                                userInventoryDAO.updateGenerator(account.getId(), generator.getName());
                                 equipmentDAO.updateGenerator(account.getId(), generator.getName());
                             }else{
                                 System.out.println("You have 0 laser of type: " + generator.getName());
@@ -515,24 +582,143 @@ public class Main {
                 }
             }
 
+        }else if(answer1 == 2){
+            unequipGenerators(userInventoryDAO, generatorsDAO, equipmentDAO, lasersDAO, starshipStatsDAO);
         }
-        equipmentMenu(userInventoryDAO, lasersDAO,generatorsDAO, equipmentDAO);
-        shield = shield1;
+        equipmentMenu(userInventoryDAO, lasersDAO,generatorsDAO, equipmentDAO, starshipStatsDAO);
+
 
     }
 
-    public static void unequipLaser() {
+    public static void unequipLaser(UserInventoryDAO userInventoryDAO, LasersDAO lasersDAO, EquipmentDAO equipmentDAO,
+                                    GeneratorsDAO generatorsDAO, StarshipStatsDAO starshipStatsDAO) {
 
+        int occupiedLaserSlots = equipment.getLf1() +equipment.getMp1()
+                +equipment.getLf2()+equipment.getLf3();
+
+
+        System.out.println("You have " + occupiedLaserSlots + " free laser slots and your lasers from equipment are : "
+                + equipment.getLf1() + " LF1, "
+                + equipment.getMp1() + " MP1, "
+                + equipment.getLf2() + " LF2, "
+                + equipment.getLf3()+ " LF3.");
+        boolean unEquipLaser = true;
+        if(unEquipLaser){
+            int n =1;
+            System.out.println("Choose one of the types of laser from bellow to unequip :");
+            for(String str : listOfAllLasers){
+                System.out.println(n + ". " + str);
+                n++;
+            }
+            int idOfSelectedLaser = s.nextInt();
+            laser.setIdLasers(idOfSelectedLaser);
+            int numberOfLasersOfThisType=0;
+            if(idOfSelectedLaser == 1){
+                numberOfLasersOfThisType = equipment.getLf1();
+            }else if(idOfSelectedLaser == 2){
+                numberOfLasersOfThisType = equipment.getMp1();
+            }else if(idOfSelectedLaser == 3){
+                numberOfLasersOfThisType = equipment.getLf2();
+            }else if (idOfSelectedLaser == 4){
+                numberOfLasersOfThisType = equipment.getLf3();
+            }
+            while(unEquipLaser && occupiedLaserSlots>0){
+                if(idOfSelectedLaser > 0 && idOfSelectedLaser<(listOfAllLasers.size()+1)){
+                    System.out.println("You have " + occupiedLaserSlots + " / " + currentShip.getShipsLaserSlots() +
+                            " slots available.");
+                    System.out.println("Press 1 to unequip one laser of this type or 0 to exit");
+                    int answer2 = s.nextInt();
+                    if(answer2 == 1 && occupiedLaserSlots >0 ){
+                        try{
+                            lasersDAO.get(laser);
+                            if(numberOfLasersOfThisType>0) {
+                                numberOfLasersOfThisType--;
+                                userInventoryDAO.updateLaserUnEquip(account.getId(), laser.getName());
+                                equipmentDAO.updateLaserUnEquip(account.getId(), laser.getName());
+                                if (numberOfLasersOfThisType == 0) {
+                                    System.out.println("You have 0 laser of type: " + laser.getName());
+                                    unEquipLaser = false;
+                                }
+                            }
+                        }catch (SQLException e){
+                            System.out.println("Equipping laser exception "+ e.getMessage());
+                        }
+                    }else  if(answer2 == 1 && occupiedLaserSlots == currentShip.getShipsLaserSlots()){
+                        System.out.println("All your laser slots are free");
+                        unEquipLaser = false;
+                    }else  if (answer2 == 0){
+                        unEquipLaser = false;
+                    }
+                }
+            }
+        }
     }
 
-    public static void unequipGenerator() {
-        System.out.println("Unequipping item...");
+    public static void unequipGenerators(UserInventoryDAO userInventoryDAO, GeneratorsDAO generatorsDAO,
+                                       EquipmentDAO equipmentDAO, LasersDAO lasersDAO, StarshipStatsDAO starshipStatsDAO ) {
+        int occupiedGeneratorsSlots = equipment.getSg3NA01() + equipment.getSg3NA02() +
+                equipment.getSg3NA03() + equipment.getSg3NB01() + equipment.getSg3NB02();
+
+
+        System.out.println("You have " + occupiedGeneratorsSlots + " used generator slots and your generators from equipment are : "
+                + equipment.getSg3NA01() + " A01, "
+                + equipment.getSg3NA02() + " A02, "
+                + equipment.getSg3NA03() + " A03, "
+                + equipment.getSg3NB01() + " B01, "
+                + equipment.getSg3NB02() + " B02.");
+        boolean unEquipGen = true;
+        if(unEquipGen){
+            int n =1;
+            System.out.println("Choose one of the types of generator from bellow:");
+            for(String str : listOfAllGenerators){
+                System.out.println(n + ". " + str);
+                n++;
+            }
+            int idOfSelectedGen = s.nextInt();
+            int numberOfGenOfThisType = 0;
+            if(idOfSelectedGen == 1){
+                numberOfGenOfThisType = equipment.getSg3NA01();
+            }else if(idOfSelectedGen == 2){
+                numberOfGenOfThisType = equipment.getSg3NA02();
+            }else if(idOfSelectedGen == 3){
+                numberOfGenOfThisType = equipment.getSg3NA03();
+            }else if(idOfSelectedGen == 4){
+                numberOfGenOfThisType = equipment.getSg3NB01();
+            }else if(idOfSelectedGen == 5){
+                numberOfGenOfThisType = equipment.getSg3NB02();
+            }
+            generator.setIdGenerators(idOfSelectedGen);
+            while(unEquipGen && occupiedGeneratorsSlots >0){
+                if(idOfSelectedGen > 0 && idOfSelectedGen<(listOfAllGenerators.size()+1)){
+                    System.out.println("You have " + occupiedGeneratorsSlots + " / " + currentShip.getShipsGenSlots() +
+                            " occupied slots.");
+                    System.out.println("Press 1 to unequip one generator of this type or 0 to exit");
+                    int answer2 = s.nextInt();
+                    if(answer2 == 1){
+                        try{
+                            generatorsDAO.get(generator);
+                            if(numberOfGenOfThisType>0){
+                                numberOfGenOfThisType--;
+                                userInventoryDAO.updateGeneratorUnEquip(account.getId(), generator.getName());
+                                equipmentDAO.updateGeneratorUnEquip(account.getId(), generator.getName());
+                                if(numberOfGenOfThisType == 0){
+                                    System.out.println("You have 0 generators of type: " + generator.getName());
+                                    unEquipGen = false;
+                                }
+                            }
+                        }catch (SQLException e){
+                            System.out.println("Equipping generator exception "+ e.getMessage());
+                        }
+                    }else  if(answer2 == 1 && occupiedGeneratorsSlots == currentShip.getShipsGenSlots()){
+                        System.out.println("All your generator slots are free");
+                        unEquipGen = false;
+                    }else  if (answer2 == 0){
+                        unEquipGen = false;
+                    }
+                }
+            }
+        }
     }
-
-    public static void start(ShipsDAO shipsDAO, int damage, int shield){
-
-    }
-
 
     public static void main(String[] args) {
 
@@ -543,15 +729,18 @@ public class Main {
         LasersDAO lasersDAO = new LasersDAOImpl();
         GeneratorsDAO generatorsDAO = new GeneratorsDAOImpl();
         EquipmentDAO equipmentDAO = new EquipmentDAOImpl();
+        StarshipStatsDAO starshipStatsDAO = new StarshipStatsImpl();
 
         shipService = new ShipServiceImpl(shipsDAO, accountsDAO, userShipsDAO, s);
 
 
-        loginOrRegister(accountsDAO, userInventoryDAO, userShipsDAO);
-        chooseShip(userShipsDAO, account.getId(), shipsDAO);
-        mainMenu(userShipsDAO, shipsDAO, accountsDAO, lasersDAO, userInventoryDAO, generatorsDAO, equipmentDAO);
-        System.out.println("Max damage = " + maxDamage);
-        System.out.println("Ship shield = " + shield);
+        loginOrRegister(accountsDAO, userInventoryDAO, userShipsDAO, starshipStatsDAO, equipmentDAO);
+        mainMenu(userShipsDAO, shipsDAO, accountsDAO, lasersDAO, userInventoryDAO, generatorsDAO, equipmentDAO, starshipStatsDAO);
+        System.out.println("Ship name : " + starshipStats.getStarshipName());
+        System.out.println("Ship hitpoints : " + starshipStats.getHp());
+        System.out.println("Max damage : " + starshipStats.getDamage());
+        System.out.println("Ship shield : " + starshipStats.getShield());
+        System.out.println("Log out...");
 
     }
 }

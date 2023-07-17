@@ -14,11 +14,11 @@ public interface EquipmentDAO {
 
     int updateLaser(int accountsId, String laserName) throws SQLException ;
 
-    int updateLaserEquip(int accountsId, String laserName) throws SQLException ;
+    int updateLaserUnEquip(int accountsId, String laserName) throws SQLException ;
 
     int updateGenerator(int accountsId, String generatorName) throws SQLException ;
 
-    int updateGeneratorEquip(int accountsId, String generatorName) throws SQLException ;
+    int updateGeneratorUnEquip(int accountsId, String generatorName) throws SQLException ;
 
     void delete(Equipment equipment) throws SQLException;
 }

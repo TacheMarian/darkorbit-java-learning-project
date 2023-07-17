@@ -196,6 +196,39 @@ public class UserInventoryImpl implements UserInventoryDAO {
     }
 
     @Override
+    public int updateLaserUnEquip(int accountsId, String laserName) {
+        PreparedStatement stmt = null;
+        int result = 0;
+
+        try {
+            connection = DatabaseConfig.getConnection();
+            String sql = "UPDATE darkorbit_accounts.user_inventory SET " +
+                    laserName + " = " + laserName + " + 1 WHERE id_user_inventory = ?";
+            stmt = connection.prepareStatement(sql);
+            stmt.setInt(1, accountsId);
+            result = stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            System.err.println("An error occurred while updating the laser from inventory: " + e.getMessage());
+
+        } finally {
+            try {
+                if (connection != null) {
+                    connection.close();
+                }
+                if (stmt != null) {
+                    stmt.close();
+                }
+            } catch (SQLException e) {
+                System.err.println("An error occurred while closing the resources: " + e.getMessage());
+
+            }
+        }
+
+        return result;
+    }
+
+    @Override
     public int updateGenerator(int accountsId, String generatorName) {
         PreparedStatement stmt = null;
         int result = 0;
@@ -203,7 +236,7 @@ public class UserInventoryImpl implements UserInventoryDAO {
         try {
             connection = DatabaseConfig.getConnection();
             String sql = "UPDATE darkorbit_accounts.user_inventory SET " +
-                    generatorName + " = " + generatorName + " + 1 WHERE id_user_inventory = ?";
+                    generatorName + " = " + generatorName + " - 1 WHERE id_user_inventory = ?";
             stmt = connection.prepareStatement(sql);
             stmt.setInt(1, accountsId);
             result = stmt.executeUpdate();
@@ -229,14 +262,14 @@ public class UserInventoryImpl implements UserInventoryDAO {
     }
 
     @Override
-    public int updateGeneratorEquip(int accountsId, String generatorName) {
+    public int updateGeneratorUnEquip(int accountsId, String generatorName) {
         PreparedStatement stmt = null;
         int result = 0;
 
         try {
             connection = DatabaseConfig.getConnection();
             String sql = "UPDATE darkorbit_accounts.user_inventory SET " +
-                    generatorName + " = " + generatorName + " - 1 WHERE id_user_inventory = ?";
+                    generatorName + " = " + generatorName + " + 1 WHERE id_user_inventory = ?";
             stmt = connection.prepareStatement(sql);
             stmt.setInt(1, accountsId);
             result = stmt.executeUpdate();
