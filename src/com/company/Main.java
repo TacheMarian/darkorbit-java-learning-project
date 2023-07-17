@@ -18,7 +18,6 @@ public class Main {
     static UserInventory userInventory;
     static UserShips userShips;
     static List<String> listOfShips;
-    static List<String> listOfAllShips;
     static Ship chosenShip;
     static Laser laser;
     static List<String> listOfAllInfoAboutLasers;
@@ -546,6 +545,7 @@ public class Main {
         EquipmentDAO equipmentDAO = new EquipmentDAOImpl();
 
         shipService = new ShipServiceImpl(shipsDAO, accountsDAO, userShipsDAO, s);
+
 
         loginOrRegister(accountsDAO, userInventoryDAO, userShipsDAO);
         chooseShip(userShipsDAO, account.getId(), shipsDAO);

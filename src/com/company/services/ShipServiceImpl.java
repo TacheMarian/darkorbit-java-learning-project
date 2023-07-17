@@ -29,7 +29,7 @@ public class ShipServiceImpl implements ShipService {
 
     @Override
     public void buyShip(Account account) {
-        int n=1;
+        int shipOptionNumber=1;
         Ship ship = new Ship();
         try{
             List<String> listOfAllShips = shipsDAO.getAll(ship);
@@ -41,14 +41,14 @@ public class ShipServiceImpl implements ShipService {
             }
             System.out.println("Choose from the available ship: ");
             for(String str1 : listOfAllShips){
-                System.out.println(n + " " +str1);
+                System.out.println(shipOptionNumber + ". " +str1);
                 listOfNotOwenedShips.add(str1);
-                n++;
+                shipOptionNumber++;
             }
-            int m = s.nextInt();
+            int userSelectedOption = s.nextInt();
             s.nextLine();
-            if(m > 0 && m < (listOfNotOwenedShips.size()+1)){
-                ship.setShipName(listOfNotOwenedShips.get(m-1));
+            if(userSelectedOption > 0 && userSelectedOption < (listOfNotOwenedShips.size()+1)){
+                ship.setShipName(listOfNotOwenedShips.get(userSelectedOption-1));
             }else{
                 System.out.println("No viable value, try again");
                 buyShip(account);
@@ -101,7 +101,7 @@ public class ShipServiceImpl implements ShipService {
                 if(ship.getShipPriceCredits()!=0 && (ship.getShipPriceCredits()< account.getCredits())){
                     accountsDAO.updateBuyCredits(account, ship.getShipPriceCredits());
                     userShipsDAO.insert(userShips);
-                    return;
+
                 }else if(ship.getShipPriceUridium()!=0 && (ship.getShipPriceUridium()< account.getUridium())){
                     accountsDAO.updateBuyUridium(account, ship.getShipPriceUridium());
                     userShipsDAO.insert(userShips);
